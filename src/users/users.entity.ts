@@ -1,0 +1,32 @@
+// src/users/entities/user.entity.ts
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+
+@Entity('users')
+export class User {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column({ unique: true })
+  username: string;
+
+  @Column()
+  password: string;
+
+  @Column({ unique: true })
+  email: string;
+
+  @Column()
+  fullName: string;
+
+  @Column()
+  age: number;
+
+  @Column()
+  gender: string;
+
+  @Column()
+  profession: string;
+
+  @Column({ default: 'user' })
+  role: string;
+}
