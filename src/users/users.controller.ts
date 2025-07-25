@@ -18,6 +18,7 @@ import { Request } from 'express';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { Roles } from 'src/common/decorators/roles.decorator';
+import { SessionAuthGuard } from 'src/auth/session-auth.guard';
 
 @Controller('users')
 export class UsersController {
@@ -33,7 +34,7 @@ export class UsersController {
   }
 
   // ✅ Authenticated: View own profile
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(SessionAuthGuard,JwtAuthGuard)
   @Get('profile')
   getProfile(@Req() req: Request) {
     

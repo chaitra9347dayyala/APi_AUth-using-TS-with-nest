@@ -4,19 +4,20 @@ import {
   Injectable,
   UnauthorizedException,
   ConflictException,
-  BadRequestException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { SessionService } from './session.service';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private usersService: UsersService,
-    private jwtService: JwtService,
+    private readonly usersService: UsersService,
+    private readonly jwtService: JwtService,
+    private readonly sessionService: SessionService,
   ) {}
 
   // ✅ Register method
@@ -58,7 +59,7 @@ export class AuthService {
     return result;
   }
 
-  // ✅ Login method
+  // ✅ Login method with session service
   async login(loginDto: LoginDto) {
     const user = await this.usersService.findByUsername(loginDto.username);
     if (!user) throw new UnauthorizedException('User not found');
@@ -66,9 +67,21 @@ export class AuthService {
     const isMatch = await bcrypt.compare(loginDto.password, user.password);
     if (!isMatch) throw new UnauthorizedException('Invalid credentials');
 
+    
+
+    // ✅ Use SessionService instead of sessionRepository
+    await this.sessionService.invalidateUserSessions(user.id); // deactivate previous
     const payload = { username: user.username, sub: user.id, role: user.role };
+    const token = this.jwtService.sign(payload, { expiresIn: '1h' }); 
+    await this.sessionService.createSession(user.id, token);// save new
+
     return {
-      access_token: this.jwtService.sign(payload),
+      access_token: token,
     };
+  }
+
+  async generateToken(userId: number): Promise<string> {
+    const payload = { sub: userId };
+    return this.jwtService.sign(payload, { expiresIn: '1h' });
   }
 }
