@@ -11,12 +11,16 @@ import { SessionService } from './session.service';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ActivityInterceptor } from 'src/session-activity/session-activity.interceptor';
 import { SessionAuthGuard } from './session-auth.guard';
+import { User } from '../users/user-entities/users.entity'; // ✅ Needed for SessionService
+import { UserData } from '../users/user-entities/users_data.entity'; // optional if you reference it
 
 @Module({
   imports: [
     ConfigModule,
     UsersModule,
-    TypeOrmModule.forFeature([Session]),
+
+    TypeOrmModule.forFeature([Session, User]), // ✅ Needed for session+user mapping
+
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -26,11 +30,17 @@ import { SessionAuthGuard } from './session-auth.guard';
       }),
     }),
   ],
-  providers: [AuthService, JwtStrategy, SessionService,  {
-    provide: APP_INTERCEPTOR,
-    useClass: ActivityInterceptor,
-  },SessionAuthGuard],
+  providers: [
+    AuthService,
+    JwtStrategy,
+    SessionService,
+    SessionAuthGuard,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ActivityInterceptor,
+    },
+  ],
   controllers: [AuthController],
-  exports: [SessionService, AuthService,SessionAuthGuard],
+  exports: [SessionService, AuthService, SessionAuthGuard],
 })
 export class AuthModule {}

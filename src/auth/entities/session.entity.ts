@@ -1,7 +1,6 @@
 // src/auth/entities/session.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
-import { User } from '../../users/users.entity';
-
+import { User } from '../../users/user-entities/users.entity';
 @Entity('sessions') // make sure the table name matches exactly
 export class Session {
   @PrimaryGeneratedColumn()

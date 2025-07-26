@@ -1,5 +1,5 @@
-// src/users/entities/user.entity.ts
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { UserData } from '../user-entities/users_data.entity';
 
 @Entity('users')
 export class User {
@@ -29,4 +29,14 @@ export class User {
 
   @Column({ default: 'user' })
   role: string;
+
+  @Column({ default: 0 })
+  totalAdded: number;
+
+  @Column({ default: 0 })
+  totalDeleted: number;
+
+  @OneToMany(() => UserData, (userData) => userData.user)
+  userData: UserData[];
 }
+
