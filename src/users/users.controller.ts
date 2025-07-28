@@ -10,6 +10,8 @@ import {
   Patch,
   Param,
   ParseIntPipe,
+  Delete,
+  Post,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -20,6 +22,7 @@ import { UpdateRoleDto } from './dto/update-role.dto';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { SessionAuthGuard } from 'src/auth/session-auth.guard';
 import { UserDataService } from './user-data.services';
+import { RegisterDto } from 'src/auth/dto/register.dto';
 
 @Controller('users')
 export class UsersController {
@@ -36,19 +39,19 @@ export class UsersController {
     return this.usersService.getAll();
   }
 
-  // ✅ Authenticated: View own profile
-  @UseGuards(SessionAuthGuard, JwtAuthGuard)
+  
+  @UseGuards( JwtAuthGuard,SessionAuthGuard)
   @Get('profile')
   getProfile(@Req() req: Request) {
     if (!req.user) {
       throw new UnauthorizedException('User not authenticated');
     }
 
-    const userId = req.user['sub'];
+    const userId = req.user['id'];
     return this.usersService.getById(userId);
   }
 
-  // ✅ Authenticated: Edit own profile
+  
   @UseGuards(JwtAuthGuard)
   @Put('profile')
   updateProfile(@Req() req: Request, @Body() dto: UpdateUserDto) {
@@ -56,11 +59,11 @@ export class UsersController {
       throw new UnauthorizedException('User not authenticated');
     }
 
-    const userId = req.user['sub'];
+    const userId = req.user['id'];
     return this.usersService.updateUser(userId, dto);
   }
 
-  // ✅ Admin-only: Change a user's role
+  
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @Patch('update-role/:id')
@@ -71,7 +74,7 @@ export class UsersController {
     return this.usersService.updateUserRole(id, dto.role);
   }
 
-  // ✅ Admin-only: Get all user data (active + inactive)
+  
   @UseGuards(JwtAuthGuard, SessionAuthGuard, RolesGuard)
   @Roles('admin')
   @Get('admin/data')
@@ -79,11 +82,22 @@ export class UsersController {
     return this.userDataService.getAllUserData();
   }
 
-  // ✅ Admin-only: Get specific user's data (active + inactive)
   @UseGuards(JwtAuthGuard, SessionAuthGuard, RolesGuard)
   @Roles('admin')
   @Get('admin/data/:userId')
   getUserDataById(@Param('userId', ParseIntPipe) userId: number) {
     return this.userDataService.getUserDataIncludingInactive(userId);
   }
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @Delete(':id')
+  async softDelete(@Param('id', ParseIntPipe) id: number) {
+    return await this.usersService.softDeleteUser(id);
+  }
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+@Post('register')
+async adminRegistersUser(@Body() dto: RegisterDto) {
+  return await this.usersService.createUser(dto);
+}
 }

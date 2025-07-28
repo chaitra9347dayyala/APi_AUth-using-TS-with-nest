@@ -16,8 +16,8 @@ export class UpdateUserDto {
 
   @IsOptional()
   @IsInt()
-  @Min(5)
-  @Max(100)
+  // @Min(5)
+  // @Max(100)
   age?: number;
 
   @IsOptional()

@@ -47,10 +47,10 @@ export class AuthService {
     };
   }
 
-  // ✅ Validate user (for login)
+
   async validateUser(username: string, pass: string): Promise<any> {
     const user = await this.usersService.findByUsername(username);
-    if (!user) throw new UnauthorizedException('User not found');
+    if (!user||user.activeuser==false) throw new UnauthorizedException('User not found or deleted');
 
     const isPasswordValid = await bcrypt.compare(pass, user.password);
     if (!isPasswordValid) throw new UnauthorizedException('Invalid credentials');
@@ -59,7 +59,7 @@ export class AuthService {
     return result;
   }
 
-  // ✅ Login method with session service
+ 
   async login(loginDto: LoginDto) {
     const user = await this.usersService.findByUsername(loginDto.username);
     if (!user) throw new UnauthorizedException('User not found');
@@ -69,7 +69,6 @@ export class AuthService {
 
     
 
-    // ✅ Use SessionService instead of sessionRepository
     await this.sessionService.invalidateUserSessions(user.id); // deactivate previous
     const payload = { username: user.username, sub: user.id, role: user.role };
     const token = this.jwtService.sign(payload, { expiresIn: '1h' }); 

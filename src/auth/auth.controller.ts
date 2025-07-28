@@ -12,24 +12,24 @@ import { SessionService } from './session.service';
 export class AuthController {
   constructor(
     private authService: AuthService,
-    private usersService: UsersService, 
+    private usersService: UsersService,
     private sessionService: SessionService,
-  ) {}
+  ) { }
 
   // auth.controller.ts
-@Post('register')
-register(@Body() registerDto: RegisterDto) {
-  return this.authService.register(registerDto);
-}
+  @Post('register')
+  register(@Body() registerDto: RegisterDto) {
+    return this.authService.register(registerDto);
+  }
 
-@Post('login')
-login(@Body() loginDto: LoginDto) {
-  return this.authService.login(loginDto);
-}
-@UseGuards(JwtAuthGuard)
+  @Post('login')
+  login(@Body() loginDto: LoginDto) {
+    return this.authService.login(loginDto);
+  }
+  @UseGuards(JwtAuthGuard)
   @Post('extend-session')
   async extendSession(@Req() req: Request) {
-    const user = (req as any ).User;
+    const user = (req as any).User;
 
     if (!user || !user.id) {
       throw new UnauthorizedException('Invalid user.');
@@ -44,8 +44,7 @@ login(@Body() loginDto: LoginDto) {
     await this.sessionService.updateToken(user.id, newToken);
 
     return { token: newToken };
-}
+  }
 
 
 }
-   

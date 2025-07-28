@@ -36,6 +36,9 @@ export class User {
   @Column({ default: 0 })
   totalDeleted: number;
 
+  @Column({default:true})
+  activeuser: boolean;
+
   @OneToMany(() => UserData, (userData) => userData.user)
   userData: UserData[];
 }

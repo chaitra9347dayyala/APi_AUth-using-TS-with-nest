@@ -13,7 +13,6 @@ import { User } from './user-entities/users.entity';
 export class UsersService {
   constructor(@InjectRepository(User) private repo: Repository<User>) {}
 
-  // ✅ Create full user with all fields from RegisterDto
   async createUser(userData: Partial<User>): Promise<User> {
     try {
       const existingUser = await this.repo.findOne({
@@ -32,26 +31,30 @@ export class UsersService {
     }
   }
 
-  // ✅ Find by username
+ 
   async findByUsername(username: string): Promise<User | null> {
     return this.repo.findOne({ where: { username } });
   }
 
 
-  // ✅ Get all users (admin-only access should be applied at controller level)
+ 
   async getAll(): Promise<User[]> {
-    return this.repo.find();
+    return this.repo.find({
+    where: {
+      activeuser: true,
+    },
+  });
   }
 
 
-  // ✅ Get a single user by ID
+  
   async getById(id: number): Promise<User> {
     const user = await this.repo.findOne({ where: { id } });
     if (!user) throw new NotFoundException('User not found');
     return user;
   }
 
-  // ✅ Update profile for logged-in user
+  
   async updateUser(id: number, updateData: Partial<User>): Promise<User> {
     const user = await this.getById(id);
     Object.assign(user, updateData);
@@ -65,4 +68,13 @@ export class UsersService {
   user.role = newRole;
   return this.repo.save(user);
 }
+async softDeleteUser(id: number): Promise<string> {
+    const user = await this.repo.findOne({ where: { id, activeuser: true} });
+    if (!user) throw new NotFoundException('User not found or already deleted.');
+
+    user.activeuser = false;
+    await this.repo.save(user);
+
+    return `User ${id} soft deleted successfully.`;
+  }
 }
