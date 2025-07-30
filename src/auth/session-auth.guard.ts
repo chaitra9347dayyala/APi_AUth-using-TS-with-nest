@@ -53,7 +53,7 @@ export class SessionAuthGuard extends AuthGuard('jwt') {
       throw new UnauthorizedException('Session expired or invalidated');
     }
 
-    // ✅ Update last activity timestamp
+    
     await sessionService.updateLastActivity(token);
     console.log('✅ Session is valid. Proceeding...');
 

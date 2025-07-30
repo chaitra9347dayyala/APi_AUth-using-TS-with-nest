@@ -27,7 +27,7 @@ export class UserDataController {
 @UseGuards(JwtAuthGuard, SessionAuthGuard)
 @Post()
 async addUserData(@Request() req, @Body() createDto: CreateUserDataDto) {
-  const userId = req.user.id; // ✅ Use 'sub' from token payload
+  const userId = req.user.id; 
   return await this.userDataService.addData(userId, createDto.object);
 }
 @UseGuards(JwtAuthGuard, SessionAuthGuard)
@@ -49,4 +49,20 @@ async getUserData(@Request() req) {
     }
     return { message: 'Data soft-deleted successfully' };
   }
+ @Post('delete-many')
+async softDeleteManyUserData(
+  @Request() req,
+  @Body() body: { ids: number[] },
+) {
+  const userId = req.user.id;
+  const result = await this.userDataService.softDeleteManyData(userId, body.ids);
+
+  if (!result.success) {
+    throw new HttpException(result.message, HttpStatus.BAD_REQUEST);
+  }
+
+  return { message: 'Data soft-deleted successfully' };
+}
+
+
 }

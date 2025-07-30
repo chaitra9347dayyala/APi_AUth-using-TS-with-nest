@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { UserData } from './user-entities/users_data.entity';
 import { User } from './user-entities/users.entity';
 
@@ -83,7 +83,7 @@ export class UserDataService {
     return true;
   }
 
-  // ✅ Admin: Get all user data (active + inactive)
+
   async getAllUserData(): Promise<UserData[]> {
     return await this.userDataRepository.find({
       relations: ['user'],
@@ -96,7 +96,6 @@ export class UserDataService {
     });
   }
 
-  // ✅ Admin: Get specific user's data (active + inactive)
   async getUserDataIncludingInactive(userId: number): Promise<UserData[]> {
     return await this.userDataRepository.find({
       where: {
@@ -106,4 +105,26 @@ export class UserDataService {
       order: { id: 'ASC' },
     });
   }
+  
+async softDeleteManyData(userId: number, ids: number[]): Promise<{ success: boolean; message: string }> {
+  if (!Array.isArray(ids) || ids.length === 0) {
+    return { success: false, message: 'No IDs provided for deletion' };
+  }
+
+  const updateResult = await this.userDataRepository
+    .createQueryBuilder()
+    .update()
+    .set({ isActive: false })
+    .where('id IN (:...ids)', { ids })
+    .andWhere('userId = :userId', { userId })
+    .execute();
+
+  if (updateResult.affected === 0) {
+    return { success: false, message: 'No data found or unauthorized' };
+  }
+
+  return { success: true, message: 'Deleted successfully' };
+}
+
+
 }

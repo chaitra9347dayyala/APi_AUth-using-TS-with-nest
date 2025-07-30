@@ -6,7 +6,7 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { User } from './user-entities/users.entity';
 
 @Injectable()
@@ -76,5 +76,18 @@ async softDeleteUser(id: number): Promise<string> {
     await this.repo.save(user);
 
     return `User ${id} soft deleted successfully.`;
+  }
+
+    async softDeleteManyUsers(ids: number[]) {
+    if (!ids || ids.length === 0) {
+      return { success: false, message: 'No user IDs provided' };
+    }
+
+    await this.repo.update(
+      { id: In(ids) },
+      { activeuser: false },
+    );
+
+    return { success: true };
   }
 }

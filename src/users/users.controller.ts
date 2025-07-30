@@ -12,6 +12,8 @@ import {
   ParseIntPipe,
   Delete,
   Post,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -29,9 +31,10 @@ export class UsersController {
   constructor(
     private readonly usersService: UsersService,
     private readonly userDataService: UserDataService,
+
   ) {}
 
-  // ✅ Admin-only: View all users with stats
+
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @Get()
@@ -100,4 +103,16 @@ export class UsersController {
 async adminRegistersUser(@Body() dto: RegisterDto) {
   return await this.usersService.createUser(dto);
 }
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('admin')
+  @Post('delete-many')
+  async softDeleteManyUsers(@Body() body: { ids: number[] }) {
+    const result = await this.usersService.softDeleteManyUsers(body.ids);
+
+    if (!result.success) {
+      throw new HttpException(result.message||"unknown error", HttpStatus.BAD_REQUEST);
+    }
+
+    return { message: 'Users soft-deleted successfully' };
+  }
 }
