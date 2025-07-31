@@ -27,4 +27,30 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   profession?: string;
+
+  @IsOptional()
+  @IsString()
+  phoneNumber?: string;
+
+  @IsOptional()
+  @IsString() 
+  addressline1?: string;
+
+  @IsOptional()
+  @IsString()
+  addressLine2?: string;
+
+  @IsOptional()
+  @IsString()
+  city?: string;
+
+  @IsOptional()
+  @IsString() 
+  state?: string;
+
+  @IsOptional()
+  @IsString()
+  country?: string;
+
+  
 }
